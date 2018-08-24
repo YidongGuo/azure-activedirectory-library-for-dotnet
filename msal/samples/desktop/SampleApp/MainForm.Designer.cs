@@ -31,51 +31,66 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.signInPage = new System.Windows.Forms.TabPage();
-            this.calendarPage = new System.Windows.Forms.TabPage();
+            this.signOutButton1 = new System.Windows.Forms.Button();
+            this.tokenResultBox = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.calendarPage = new System.Windows.Forms.TabPage();
+            this.calendarTextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.signInPage.SuspendLayout();
-            this.calendarPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.calendarPage.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.signInPage);
             this.tabControl1.Controls.Add(this.calendarPage);
-            this.tabControl1.Location = new System.Drawing.Point(-1, -2);
+            this.tabControl1.Location = new System.Drawing.Point(-1, -1);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(813, 589);
+            this.tabControl1.Size = new System.Drawing.Size(542, 383);
             this.tabControl1.TabIndex = 0;
             // 
             // signInPage
             // 
+            this.signInPage.Controls.Add(this.signOutButton1);
+            this.signInPage.Controls.Add(this.tokenResultBox);
             this.signInPage.Controls.Add(this.pictureBox1);
-            this.signInPage.Location = new System.Drawing.Point(4, 29);
+            this.signInPage.Location = new System.Drawing.Point(4, 22);
+            this.signInPage.Margin = new System.Windows.Forms.Padding(2);
             this.signInPage.Name = "signInPage";
-            this.signInPage.Padding = new System.Windows.Forms.Padding(3);
-            this.signInPage.Size = new System.Drawing.Size(805, 556);
+            this.signInPage.Padding = new System.Windows.Forms.Padding(2);
+            this.signInPage.Size = new System.Drawing.Size(534, 357);
             this.signInPage.TabIndex = 0;
             this.signInPage.Text = "signInPage";
             this.signInPage.UseVisualStyleBackColor = true;
             // 
-            // calendarPage
+            // signOutButton1
             // 
-            this.calendarPage.Controls.Add(this.tableLayoutPanel1);
-            this.calendarPage.Location = new System.Drawing.Point(4, 29);
-            this.calendarPage.Name = "calendarPage";
-            this.calendarPage.Padding = new System.Windows.Forms.Padding(3);
-            this.calendarPage.Size = new System.Drawing.Size(805, 556);
-            this.calendarPage.TabIndex = 1;
-            this.calendarPage.Text = "calendarPage";
-            this.calendarPage.UseVisualStyleBackColor = true;
+            this.signOutButton1.Location = new System.Drawing.Point(426, 319);
+            this.signOutButton1.Name = "signOutButton1";
+            this.signOutButton1.Size = new System.Drawing.Size(79, 25);
+            this.signOutButton1.TabIndex = 2;
+            this.signOutButton1.Text = "Sign Out";
+            this.signOutButton1.UseVisualStyleBackColor = true;
+            this.signOutButton1.Click += new System.EventHandler(this.signOutButton1_Click);
+            // 
+            // tokenResultBox
+            // 
+            this.tokenResultBox.Location = new System.Drawing.Point(19, 213);
+            this.tokenResultBox.Multiline = true;
+            this.tokenResultBox.Name = "tokenResultBox";
+            this.tokenResultBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.tokenResultBox.Size = new System.Drawing.Size(366, 96);
+            this.tokenResultBox.TabIndex = 1;
             // 
             // pictureBox1
             // 
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(303, 231);
+            this.pictureBox1.Location = new System.Drawing.Point(19, 27);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(2);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(230, 40);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -83,31 +98,21 @@
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
-            // tableLayoutPanel1
-            // 
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 85.71429F));
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(4, 4);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 1;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(798, 100);
-            this.tableLayoutPanel1.TabIndex = 0;
-            // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(809, 581);
+            this.ClientSize = new System.Drawing.Size(539, 378);
             this.Controls.Add(this.tabControl1);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "MainForm";
             this.Text = "MainForm";
             this.tabControl1.ResumeLayout(false);
             this.signInPage.ResumeLayout(false);
             this.signInPage.PerformLayout();
-            this.calendarPage.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.calendarPage.ResumeLayout(false);
+            this.calendarPage.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -118,7 +123,10 @@
         private System.Windows.Forms.TabPage signInPage;
         private System.Windows.Forms.TabPage calendarPage;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.TextBox tokenResultBox;
+        private System.Windows.Forms.TextBox calendarTextBox;
+        private System.Windows.Forms.Button signOutButton;
+        private System.Windows.Forms.Button signOutButton1;
     }
 }
 

@@ -48,39 +48,24 @@ namespace SampleApp
                 CachePersistence.GetUserCache());
         }
 
-        public async Task<IAccount> SignInAsync()
-        {
-            try
-            {
-                AuthenticationResult result = await Application.AcquireTokenAsync(new[] {"user.read", "calendars.read"}).ConfigureAwait(false);
-                return result.Account;
-            }
-            catch (Exception exc)
-            {
-                MessageBox.Show(exc.Message, "Sign in failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            return null;
-        }
-
         public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount account)
         {
             AuthenticationResult result = null;
             Exception exception = null;
             try
             {
-                result = await Application.AcquireTokenAsync(scopes, account).ConfigureAwait(false);
+                result = await Application.AcquireTokenSilentAsync(scopes, account).ConfigureAwait(false);
                 return result.AccessToken;
+
             }
             catch (MsalUiRequiredException)
             {
                 try
                 {
-                    result = await Application.AcquireTokenAsync(scopes, account)
-                        .ConfigureAwait(false);
+                    result = await Application.AcquireTokenAsync(scopes).ConfigureAwait(false);
                     return result.AccessToken;
                 }
-                catch (Exception ex)
+                catch (MsalServiceException ex)
                 {
                     exception = ex;
                 }
@@ -96,6 +81,7 @@ namespace SampleApp
             }
 
             return null;
+
         }
 
     }
