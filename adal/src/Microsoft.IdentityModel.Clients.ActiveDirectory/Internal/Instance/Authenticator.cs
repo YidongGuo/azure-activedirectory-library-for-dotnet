@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
@@ -47,11 +48,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 
         private static readonly Regex TenantNameRegex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-        private void Init(string authority, bool validateAuthority)
+        private HttpMessageHandler httpMessageHandler;
+
+        private void Init(string authority, bool validateAuthority, HttpMessageHandler httpMessageHandler)
         {
             this.Authority = EnsureUrlEndsWithForwardSlash(authority);
 
             this.AuthorityType = DetectAuthorityType(this.Authority);
+
+            this.httpMessageHandler = httpMessageHandler;
 
             if (this.AuthorityType != AuthorityType.AAD && validateAuthority)
             {
@@ -61,14 +66,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
             this.ValidateAuthority = validateAuthority;
         }
 
-        public Authenticator(string authority, bool validateAuthority)
+        public Authenticator(string authority, bool validateAuthority, HttpMessageHandler httpMessageHandler)
         {
-            Init(authority, validateAuthority);
+            Init(authority, validateAuthority, httpMessageHandler);
         }
 
-        public async Task UpdateAuthorityAsync(string authority, RequestContext requestContext)
+        public async Task UpdateAuthorityAsync(string authority, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
-            Init(authority, this.ValidateAuthority);
+            Init(authority, this.ValidateAuthority, httpMessageHandler);
 
             updatedFromTemplate = false;
             await UpdateFromTemplateAsync(requestContext).ConfigureAwait(false);
@@ -111,7 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
                 string tenant = authorityUri.Segments[authorityUri.Segments.Length - 1].TrimEnd('/');
                 if (this.AuthorityType == AuthorityType.AAD)
                 {
-                    var metadata = await InstanceDiscovery.GetMetadataEntryAsync(authorityUri, this.ValidateAuthority, requestContext).ConfigureAwait(false);
+                    var metadata = await InstanceDiscovery.GetMetadataEntryAsync(authorityUri, this.ValidateAuthority, requestContext, httpMessageHandler).ConfigureAwait(false);
                     host = metadata.PreferredNetwork;
                     // All the endpoints will use this updated host, and it affects future network calls, as desired.
                     // The Authority remains its original host, and will be used in TokenCache later.

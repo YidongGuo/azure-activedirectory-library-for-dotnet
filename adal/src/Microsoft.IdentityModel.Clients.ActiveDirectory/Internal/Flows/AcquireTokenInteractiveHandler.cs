@@ -33,6 +33,7 @@ using Microsoft.Identity.Core.UI;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
+using System.Net.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
@@ -55,8 +56,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private readonly string claims;
 
         public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters,
-            UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
-            : base(requestData)
+            UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims, HttpMessageHandler httpMessageHandler)
+            : base(requestData, httpMessageHandler)
         {
             platformInformation.ValidateRedirectUri(redirectUri, RequestContext);
             this.redirectUri = redirectUri;

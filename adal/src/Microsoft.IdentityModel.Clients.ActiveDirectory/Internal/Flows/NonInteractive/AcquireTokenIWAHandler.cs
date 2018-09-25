@@ -26,16 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.WsTrust;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
-using Microsoft.Identity.Core.WsTrust;
-using Microsoft.Identity.Core;
-using System.Diagnostics;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Realm;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
@@ -48,8 +46,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private UserAssertion userAssertion;
         private CommonNonInteractiveHandler commonNonInteractiveHandler;
 
-        public AcquireTokenIWAHandler(RequestData requestData, IntegratedWindowsAuthInput iwaInput)
-            : base(requestData)
+        public AcquireTokenIWAHandler(RequestData requestData, IntegratedWindowsAuthInput iwaInput, HttpMessageHandler httpMessageHandler)
+            : base(requestData, httpMessageHandler)
         {
             if (iwaInput == null)
             {

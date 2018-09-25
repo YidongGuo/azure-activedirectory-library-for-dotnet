@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
@@ -46,13 +47,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         private const string PKeyAuthName = "PKeyAuth";
         private const int DelayTimePeriodMilliSeconds = 1000;
         private readonly RequestContext _requestContext;
+        private HttpMessageHandler _httpMessageHandler;
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
 
-        public AdalHttpClient(string uri, RequestContext requestContext)
+        public AdalHttpClient(string uri, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
             this.RequestUri = CheckForExtraQueryParameter(uri);
-            this.Client = new HttpClientWrapper(RequestUri, requestContext);
+            this._httpMessageHandler = httpMessageHandler;
+            this.Client = new HttpClientWrapper(RequestUri, requestContext, httpMessageHandler);
             _requestContext = requestContext;
         }
 
@@ -192,7 +195,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
             string responseHeader = await DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(responseDictionary)
                 .ConfigureAwait(false);
             IRequestParameters rp = this.Client.BodyParameters;
-            this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), RequestContext);
+            this.Client = new HttpClientWrapper(CheckForExtraQueryParameter(responseDictionary["SubmitUrl"]), RequestContext, _httpMessageHandler);
             this.Client.BodyParameters = rp;
             this.Client.Headers["Authorization"] = responseHeader;
             return await this.GetResponseAsync<T>(false).ConfigureAwait(false);

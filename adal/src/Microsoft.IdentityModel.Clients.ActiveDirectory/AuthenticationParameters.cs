@@ -68,7 +68,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>AuthenticationParameters object containing authentication parameters</returns>
         public static async Task<AuthenticationParameters> CreateFromResourceUrlAsync(Uri resourceUrl)
         {
-            return await CreateFromResourceUrlCommonAsync(resourceUrl).ConfigureAwait(false);
+            return await CreateFromResourceUrlAsync(resourceUrl, null).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Creates authentication parameters from address of the resource. This method expects the resource server to return unauthorized response
+        /// with WWW-Authenticate header containing authentication parameters.
+        /// </summary>
+        /// <param name="resourceUrl">Address of the resource</param>
+        /// <param name="httpMessageHandler">The http message handler to use</param>
+        /// <returns>AuthenticationParameters object containing authentication parameters</returns>
+        public static async Task<AuthenticationParameters> CreateFromResourceUrlAsync(Uri resourceUrl, HttpMessageHandler httpMessageHandler)
+        {
+            return await CreateFromResourceUrlCommonAsync(resourceUrl, httpMessageHandler).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -136,7 +148,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return authParams;
         }
 
-        private static async Task<AuthenticationParameters> CreateFromResourceUrlCommonAsync(Uri resourceUrl)
+        private static async Task<AuthenticationParameters> CreateFromResourceUrlCommonAsync(Uri resourceUrl, HttpMessageHandler httpMessageHandler)
         {
             if (resourceUrl == null)
             {
@@ -147,7 +159,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             try
             {
-                IHttpClient request = new HttpClientWrapper(resourceUrl.AbsoluteUri, null);
+                IHttpClient request = new HttpClientWrapper(resourceUrl.AbsoluteUri, null, httpMessageHandler);
                 await request.GetResponseAsync().ConfigureAwait(false);
 
                 var ex = new AdalException(AdalError.UnauthorizedResponseExpected);

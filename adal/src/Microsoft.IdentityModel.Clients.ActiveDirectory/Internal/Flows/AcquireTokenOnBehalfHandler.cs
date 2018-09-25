@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
@@ -39,8 +40,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
     {
         private readonly UserAssertion userAssertion;
 
-        public AcquireTokenOnBehalfHandler(RequestData requestData, UserAssertion userAssertion)
-            : base(requestData)
+        public AcquireTokenOnBehalfHandler(RequestData requestData, UserAssertion userAssertion, HttpMessageHandler httpMessageHandler)
+            : base(requestData, httpMessageHandler)
         {
             if (userAssertion == null)
             {

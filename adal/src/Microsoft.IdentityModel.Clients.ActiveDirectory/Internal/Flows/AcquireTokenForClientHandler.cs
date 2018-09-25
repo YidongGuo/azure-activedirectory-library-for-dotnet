@@ -25,14 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Net.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
     internal class AcquireTokenForClientHandler : AcquireTokenHandlerBase
     {
-        public AcquireTokenForClientHandler(RequestData requestData)
-            : base(requestData)
+        public AcquireTokenForClientHandler(RequestData requestData, HttpMessageHandler httpMessageHandler)
+            : base(requestData, httpMessageHandler)
         {
             this.SupportADFS = true;
         }

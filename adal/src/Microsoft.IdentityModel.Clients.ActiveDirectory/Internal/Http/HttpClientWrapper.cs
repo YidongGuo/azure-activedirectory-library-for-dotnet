@@ -47,12 +47,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         private int _timeoutInMilliSeconds = 30000;
         private readonly long _maxResponseSizeInBytes = 1048576;
         private const string FormUrlEncoded = "application/x-www-form-urlencoded";
+        private HttpClient _httpClient;
 
         public HttpClientWrapper(string uri, RequestContext requestContext)
+            : this(uri, requestContext, null)
+        { }
+
+        public HttpClientWrapper(string uri, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
             this.uri = uri;
             this.Headers = new Dictionary<string, string>();
             this.RequestContext = requestContext;
+            this._httpClient = httpMessageHandler == null ? null : new HttpClient(httpMessageHandler);
         }
 
         protected RequestContext RequestContext { get; set; }
@@ -74,10 +80,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
             get { return this._timeoutInMilliSeconds; }
         }
 
+        private async Task<IHttpWebResponse> getHttpClientAndExecuteAsync(Func<HttpClient, Task<IHttpWebResponse>> func)
+        {
+            if (_httpClient != null)
+                return await func(_httpClient).ConfigureAwait(false);
+
+            using(HttpClient client = new HttpClient(AdalHttpMessageHandlerFactory.GetMessageHandler(this.UseDefaultCredentials)))
+                return await func(client).ConfigureAwait(false);
+        }
+
         public async Task<IHttpWebResponse> GetResponseAsync()
         {
-            using (HttpClient client =
-                new HttpClient(AdalHttpMessageHandlerFactory.GetMessageHandler(this.UseDefaultCredentials)))
+            return await getHttpClientAndExecuteAsync(async client =>
             {
                 client.MaxResponseContentBufferSize = _maxResponseSizeInBytes;
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -115,7 +129,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                         }
                         else
                         {
-                            content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, 
+                            content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8,
                                 FormUrlEncoded);
                         }
 
@@ -141,7 +155,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     throw new HttpRequestWrapperException(webResponse, new HttpRequestException(
                         string.Format(CultureInfo.CurrentCulture,
                             "Response status code does not indicate success: {0} ({1}).",
-                            (int) webResponse.StatusCode, webResponse.StatusCode),
+                            (int)webResponse.StatusCode, webResponse.StatusCode),
                         new AdalException(webResponse.Body)));
                 }
 
@@ -151,7 +165,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                 }
 
                 return webResponse;
-            }
+            }).ConfigureAwait(false);
         }
 
         public async static Task<IHttpWebResponse> CreateResponseAsync(HttpResponseMessage response)

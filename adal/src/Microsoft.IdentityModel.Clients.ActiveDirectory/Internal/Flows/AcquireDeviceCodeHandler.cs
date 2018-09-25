@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
@@ -45,14 +46,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private readonly string resource;
         private readonly RequestContext requestContext;
         private readonly string extraQueryParameters;
+        private readonly HttpMessageHandler httpMessageHandler;
 
-        public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters)
+        public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters, HttpMessageHandler httpMessageHandler)
         {
             this.authenticator = authenticator;
             this.requestContext = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
             this.clientKey = new ClientKey(clientId);
             this.resource = resource;
             this.extraQueryParameters = extraQueryParameters;
+            this.httpMessageHandler = httpMessageHandler;
         }
         
         private string CreateDeviceCodeRequestUriString()
@@ -92,7 +95,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             await this.authenticator.UpdateFromTemplateAsync(this.requestContext).ConfigureAwait(false);
             this.ValidateAuthorityType();
-            AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.requestContext);
+            AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.requestContext, this.httpMessageHandler);
             DeviceCodeResponse response = await client.GetResponseAsync<DeviceCodeResponse>().ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(response.Error))

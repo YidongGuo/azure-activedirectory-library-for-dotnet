@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
@@ -53,12 +54,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private AdalHttpClient client = null;
         protected PlatformInformation platformInformation = new PlatformInformation();
         internal readonly RequestContext RequestContext;
+        protected HttpMessageHandler httpMessageHandler;
 
-        protected AcquireTokenHandlerBase(RequestData requestData)
+        protected AcquireTokenHandlerBase(RequestData requestData, HttpMessageHandler httpMessageHandler)
         {
             this.Authenticator = requestData.Authenticator;
             RequestContext = CreateCallState(this.Authenticator.CorrelationId);
             brokerHelper.RequestContext = RequestContext;
+            this.httpMessageHandler = httpMessageHandler;
 
             var msg = string.Format(CultureInfo.CurrentCulture,
                 "ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
@@ -165,7 +168,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                     this.NotifyBeforeAccessCache();
                     notifiedBeforeAccessCache = true;
-                    ResultEx = await this.tokenCache.LoadFromCacheAsync(CacheQueryData, RequestContext).ConfigureAwait(false);
+                    ResultEx = await this.tokenCache.LoadFromCacheAsync(CacheQueryData, RequestContext, httpMessageHandler).ConfigureAwait(false);
                     extendedLifetimeResultEx = ResultEx;
 
                     if (ResultEx?.Result != null &&
@@ -241,7 +244,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 }
 
                 await this.tokenCache.StoreToCacheAsync(ResultEx, this.Authenticator.Authority, this.Resource,
-                    this.ClientKey.ClientId, this.TokenSubjectType, RequestContext).ConfigureAwait(false);
+                    this.ClientKey.ClientId, this.TokenSubjectType, RequestContext, httpMessageHandler).ConfigureAwait(false);
             }
             return notifiedBeforeAccessCache;
         }
@@ -294,7 +297,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             if(!Authenticator.Authority.Equals(updatedAuthority, StringComparison.OrdinalIgnoreCase))
             {
-                await Authenticator.UpdateAuthorityAsync(updatedAuthority, RequestContext).ConfigureAwait(false);
+                await Authenticator.UpdateAuthorityAsync(updatedAuthority, RequestContext, httpMessageHandler).ConfigureAwait(false);
                 this.ValidateAuthorityType();
             }
         }
@@ -391,7 +394,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         private async Task<AdalResultWrapper> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
-            client = new AdalHttpClient(this.Authenticator.TokenUri, RequestContext)
+            client = new AdalHttpClient(this.Authenticator.TokenUri, RequestContext, httpMessageHandler)
                 {Client = {BodyParameters = requestParameters}};
             TokenResponse tokenResponse = await client.GetResponseAsync<TokenResponse>().ConfigureAwait(false);
             return tokenResponse.GetResult();

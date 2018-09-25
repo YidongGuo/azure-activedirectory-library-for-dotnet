@@ -30,6 +30,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
@@ -356,10 +357,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal async Task<AdalResultWrapper> LoadFromCacheAsync(CacheQueryData cacheQueryData, RequestContext requestContext)
+        internal async Task<AdalResultWrapper> LoadFromCacheAsync(CacheQueryData cacheQueryData, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
             AdalResultWrapper resultEx = null;
-            var aliasedHosts = await GetOrderedAliasesAsync(cacheQueryData.Authority, false, requestContext).ConfigureAwait(false);
+            var aliasedHosts = await GetOrderedAliasesAsync(cacheQueryData.Authority, false, requestContext, httpMessageHandler).ConfigureAwait(false);
             foreach (var aliasedHost in aliasedHosts)
             {
                 cacheQueryData.Authority = ReplaceHost(cacheQueryData.Authority, aliasedHost);
@@ -393,9 +394,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return string.Format(CultureInfo.InvariantCulture, "https://{0}{1}", newHost, new Uri(oldUri).AbsolutePath);
         }
 
-        internal static async Task<List<string>> GetOrderedAliasesAsync(string authority, bool validateAuthority, RequestContext requestContext)
+        internal static async Task<List<string>> GetOrderedAliasesAsync(
+            string authority, bool validateAuthority, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
-            var metadata = await InstanceDiscovery.GetMetadataEntryAsync(new Uri(authority), validateAuthority, requestContext).ConfigureAwait(false);
+            var metadata = await InstanceDiscovery.GetMetadataEntryAsync(new Uri(authority), validateAuthority, requestContext, httpMessageHandler).ConfigureAwait(false);
             var aliasedAuthorities = new List<string>(new string[] { metadata.PreferredCache, GetHost(authority) });
             aliasedAuthorities.AddRange(metadata.Aliases ?? Enumerable.Empty<string>());
             return aliasedAuthorities;
@@ -524,9 +526,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         internal async Task StoreToCacheAsync(AdalResultWrapper result, string authority, string resource, string clientId,
-            TokenSubjectType subjectType, RequestContext requestContext)
+            TokenSubjectType subjectType, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
-            var metadata = await InstanceDiscovery.GetMetadataEntryAsync(new Uri(authority), false, requestContext).ConfigureAwait(false);
+            var metadata = await InstanceDiscovery.GetMetadataEntryAsync(new Uri(authority), false, requestContext, httpMessageHandler).ConfigureAwait(false);
             StoreToCacheCommon(result, ReplaceHost(authority, metadata.PreferredCache), resource, clientId, subjectType, requestContext);
         }
 

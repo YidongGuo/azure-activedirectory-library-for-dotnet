@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Net.Http;
 using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     interface IHttpClientFactory
     {
-        IHttpClient Create(string uri, RequestContext requestContext);
+        IHttpClient Create(string uri, RequestContext requestContext, HttpMessageHandler httpMessageHandler);
     }
 }

@@ -25,17 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
-using System;
 using Microsoft.Identity.Core;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -99,7 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         public static async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(Uri authority, bool validateAuthority,
-            RequestContext requestContext)
+            RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
             if (authority == null)
             {
@@ -114,7 +114,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     if (!InstanceCache.TryGetValue(authority.Host, out entry))
                     {
-                        await DiscoverAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
+                        await DiscoverAsync(authority, validateAuthority, requestContext, httpMessageHandler).ConfigureAwait(false);
                         InstanceCache.TryGetValue(authority.Host, out entry);
                     }
                 }
@@ -151,14 +151,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         // No return value. Modifies InstanceCache directly.
-        private static async Task DiscoverAsync(Uri authority, bool validateAuthority, RequestContext requestContext)
+        private static async Task DiscoverAsync(Uri authority, bool validateAuthority, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
             string instanceDiscoveryEndpoint = string.Format(
                 CultureInfo.InvariantCulture,
                 "https://{0}/common/discovery/instance?api-version=1.1&authorization_endpoint={1}",
                 IsWhitelisted(authority.Host) ? GetHost(authority) : DefaultTrustedAuthority,
                 FormatAuthorizeEndpoint(authority.Host, GetTenant(authority)));
-            var client = new AdalHttpClient(instanceDiscoveryEndpoint, requestContext);
+            var client = new AdalHttpClient(instanceDiscoveryEndpoint, requestContext, httpMessageHandler);
             InstanceDiscoveryResponse discoveryResponse = null;
             try
             {

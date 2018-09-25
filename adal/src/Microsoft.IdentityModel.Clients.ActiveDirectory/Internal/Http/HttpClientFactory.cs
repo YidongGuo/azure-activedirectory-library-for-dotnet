@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Net.Http;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
@@ -33,9 +34,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
 {
     internal class HttpClientFactory : IHttpClientFactory
     {
-        public IHttpClient Create(string uri, RequestContext requestContext)
+        public IHttpClient Create(string uri, RequestContext requestContext, HttpMessageHandler httpMessageHandler)
         {
-            return new HttpClientWrapper(uri, requestContext);
+            return new HttpClientWrapper(uri, requestContext, httpMessageHandler);
         }
     }
 }
